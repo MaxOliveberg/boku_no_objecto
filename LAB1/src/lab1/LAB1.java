@@ -31,10 +31,7 @@ package lab1;
 public class LAB1 {
     
     public static void main(String[] args){
-        
-        
         // E1 och E2
-        
         Human Putte = new Human(25, "Putte");
         //getAge print 
         System.out.println("getAge: " + Putte.getAge());
