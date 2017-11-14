@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="ree">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/build/classes/lab2/ree.zip!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
