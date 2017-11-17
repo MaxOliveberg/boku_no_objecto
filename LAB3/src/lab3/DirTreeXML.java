@@ -5,12 +5,15 @@ import javax.swing.tree.*;
 import java.io.*;        
 import java.awt.*;
 import java.awt.event.*;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Scanner;
 
 public class DirTreeXML extends JFrame implements ActionListener {
 
+    /*
+    The quick rundown är att jag använder en rekursiv metod för att skapa
+    nod-träden, och sen använder jag de färdigkodade ramprogrammet för att 
+    visa mitt träd.
+    */
 
     
    public DirTreeXML() {
@@ -21,8 +24,14 @@ public class DirTreeXML extends JFrame implements ActionListener {
       try{
         root = readNode();
       }catch(FileNotFoundException e){
+          /*
+          Det här är om filen ej kan hittas, vilket ej bör hända för oss.
+          */
           System.out.println("Något måste gått fel lol.");
       }catch(unbalancedTagsException e){
+          /* 
+          Lite redundant exception, man hade kunnat trycka in det i XMLformat
+          */
           System.out.println(e);
       }catch(XMLFormatException e){
           System.out.println(e);
@@ -41,7 +50,7 @@ public class DirTreeXML extends JFrame implements ActionListener {
       tree.addMouseListener( ml );
       
       //*** build the tree by adding the nodes
-      buildTree();
+     // buildTree();
       
       //*** panel the JFrame to hold controls and the tree
       controls = new JPanel();
@@ -56,12 +65,6 @@ public class DirTreeXML extends JFrame implements ActionListener {
 
    
    public void actionPerformed( ActionEvent e ) {
-      /*
-       Se init() och addButton() för mer info på detta, men knappen lyssnar
-       på det här programmet uppenbarligen. Det är möjligt att om man
-       endast gör en knappt med en string så sätts knappens "actioncommand" till
-       samma string som står på knappen. Pallar ej gräva i det just nu.
-       */
       String cmd = e.getActionCommand();
       if ( cmd.equals( closeString ) )
         dispose();
@@ -84,19 +87,6 @@ public class DirTreeXML extends JFrame implements ActionListener {
    }
 
    private void buildTree() {
-       /*
-       För mig var det lite oklart här exakt hur snyggt programmet skulle vara.
-       Man kan ju hardcodea att den skall lägga till en massa noder, vilket jag
-       gjort, men man hade ju även kunnat få den att läsa ut från nån lista 
-       eller w/e. Jag tolkade e1.2 formuleringen som att de var okej att 
-       hardcodea.
-       
-       "I metoden buildTree() suddar ni allt och skriver nya satser som 
-       tillverkar en nod child på samma sätt som rotnoden men med texten Växter.
-       Addera den till trädmodellen med root som förälder. Gör likadant med djur
-       och svampar."
-       
-       */
       String[] subFolders = {"Växter","Svampar","Djur"};
       buildTree(root, subFolders); 
    }
@@ -129,7 +119,13 @@ public class DirTreeXML extends JFrame implements ActionListener {
        */
       if ( p == null ) // crashskydd typ
         return;
+      
+      //Hämtar noden man klickat på
       MyNode infoNode = (MyNode)p.getLastPathComponent();
+      
+      /*
+      Den här delen sköter C-uppgift kravet "...som är ... ... som är ..."
+      */
       String cPrint = infoNode.toString();
       MyNode parentNode = (MyNode)infoNode.getParent();
       while(!(parentNode==null)){
@@ -137,6 +133,7 @@ public class DirTreeXML extends JFrame implements ActionListener {
           parentNode=(MyNode)parentNode.getParent();
       }
 
+      //Här skickas stringsen som skall visas in
       JOptionPane.showMessageDialog( this, infoNode.getRundown()
                                     + "\n"+
                                     cPrint);
@@ -164,6 +161,15 @@ public class DirTreeXML extends JFrame implements ActionListener {
 
 
    public void lineChecker(String argLine) throws XMLFormatException{
+       /*
+       Det här är en rage-coding shitfest men den if checkar mer eller mindre
+       alla möjliga fuckups i XML formatteringen, på en linje.
+       
+       Angående indexOf(): Returnerar -1 om tecknet, eller stringen, ej finns.
+       
+       Angående .split("TECKEN",integer): splittar upp en string till en array
+       som är integer lång, vid varje TECKEN ( tills den är integer lång)
+       */
        String checkedLine = argLine;
        String[] splitLine = checkedLine.split("");
        //System.out.println(checkedLine); // debug
@@ -172,18 +178,26 @@ public class DirTreeXML extends JFrame implements ActionListener {
        if(rightArrowIndex==-1){
            throw new XMLFormatException("Line missing an \">\".");
        }
+       
+       /*
+       Det här if-et är om linjen specifikt är en slut-tagg
+       */
        if(splitLine[1].equals("/")){
             if(checkedLine.indexOf(" ")!= -1 ||
                     rightArrowIndex!=(checkedLine.length()-1) ){
                 throw new XMLFormatException("Wrong close-tag formatting.");
             }
-        return;
+        return; // man ska ej kolla resten isf så returnera här
         }
+       
+       // varje linje skall börja på <
        if(!splitLine[0].equals("<")){
            throw new XMLFormatException("Line missing an opening \"<\".");
        }
        
-
+       /*
+       Den här delen checkar mest ordningen o så, fan läs det själv.
+       */
        int nameIndex =checkedLine.indexOf("namn=");
        int firstCitIndex = checkedLine.indexOf("\"");
        int secondCitIndex = checkedLine.indexOf("\"",firstCitIndex+1);
@@ -202,7 +216,10 @@ public class DirTreeXML extends JFrame implements ActionListener {
    
    public void endKeyCheck(String endKey, String nextLine) throws
            unbalancedTagsException{
-        System.out.println(cleanLine(nextLine.split(" ")[0]) + " v s " +endKey);
+       /*
+       De här är en shitfest metod som kollar om man sprungit in i fel slut-tag
+       Dvs att taggarna är obalanserade, eller fel, eller nåt
+       */
         if(nextLine.split("")[1].equals("/")&& 
             !cleanLine(nextLine.split(" ")[0]).equals(endKey)){
                     throw new unbalancedTagsException(
@@ -214,6 +231,10 @@ public class DirTreeXML extends JFrame implements ActionListener {
    }
    public String handleNextLine(Scanner argScanner, String endKey) 
            throws unbalancedTagsException, XMLFormatException{
+       /*
+       Denna metod hanterar stegandet för scannern, men checkar även efter fel
+       i xml filen.
+       */
        String nextLine = argScanner.nextLine();
        lineChecker(nextLine);
        endKeyCheck(endKey, nextLine);
@@ -222,7 +243,9 @@ public class DirTreeXML extends JFrame implements ActionListener {
        
    }
    public String handleNextLine(Scanner argScanner) throws XMLFormatException{
-       
+       /*
+       Samma som förra men när man ej ska, eller behöver, checka endKey
+       */
        String nextLine = argScanner.nextLine();
        lineChecker(nextLine);
        
@@ -230,12 +253,15 @@ public class DirTreeXML extends JFrame implements ActionListener {
    }
    public MyNode readNode() throws FileNotFoundException,
            unbalancedTagsException, XMLFormatException{
+       /*
+       De här är en argumentlösa versionen, som startar rekursionen
+       */
        
-       Scanner xmlScanner = new Scanner(new File("Liv.xml"));
+       Scanner xmlScanner = new Scanner(new File("Liv.xml")); // läser filen
        xmlScanner.nextLine(); // Man måste hoppa över xml version linjen.
-       String holdLine = handleNextLine(xmlScanner);
+       String holdLine = handleNextLine(xmlScanner);// första raden
        holdLine = cleanLine(holdLine);
-       String tempLine ="this is a placeholder line";
+       String tempLine ="this is a placeholder line"; //exakt vad de står
        String endKey = "/"+ holdLine.split(" ")[0];
        String[] argList = holdLine.split(" ",3);
        if(argList.length>1){
@@ -256,11 +282,17 @@ public class DirTreeXML extends JFrame implements ActionListener {
    public void recNode(MyNode parent, String argLine, String
            parentEndKey, Scanner argScanner) 
            throws unbalancedTagsException, XMLFormatException{
+       
+       /*
+       Den här versionen med argument är basically samma, fast används
+       rekursivt.
+       */
        String holdLine = cleanLine(argLine);
        Scanner xmlScanner = argScanner;
        
        String[] argList = holdLine.split(" ",3);
-       if(argList.length>1){
+       
+       if(argList.length>1){ // kommer ej ihåg varför
           String endKey = "/"+ argList[0];
           MyNode retNode = new MyNode(argList[1],argList[0],argList[2]);
           String tempLine = handleNextLine(xmlScanner,endKey);
@@ -272,7 +304,8 @@ public class DirTreeXML extends JFrame implements ActionListener {
               if(xmlScanner.hasNext()){
                  tempLine = handleNextLine(xmlScanner, endKey);
               }
-              else{
+              else{ // får den slut på listan innan den hittat sin sluttagg
+                  // är de ju problem
                   throw new unbalancedTagsException(".xml file does not have"
                           + " balanced tags!");
               }
