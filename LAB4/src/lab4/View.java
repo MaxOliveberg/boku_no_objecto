@@ -20,6 +20,11 @@ import java.awt.Color;
 public class View extends JPanel{
     
     Model Model;
+    /*
+    Vi kör på  ungefär 500x500 över allt de är basically 
+    hardkodat du får ändra på om
+    du vill men de är ett jävla jobb
+    */
     int prefSizeX = 500;
     int prefSizeY = 500;
     double radius = 2;
@@ -41,6 +46,9 @@ public class View extends JPanel{
             radius*2,radius*2);
             
             if(Model.isLocked(i/2)==true){
+                /*
+                målar in cirkeln om den är låst
+                */
                 g2.setPaint(new Color(128, 0, 0));
                 g2.fill(circle);
                 g2.setPaint(new Color(0, 150, 0));

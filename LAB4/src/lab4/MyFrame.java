@@ -1,7 +1,12 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+KVAR ATT GÖRA: 
+E5.2-6
+
+C4-5
+
+!!!
+
+STRUNTA INTE I DEM !
  */
 package lab4;
 
@@ -13,7 +18,7 @@ import javax.swing.JFrame;
  */
 public class MyFrame extends JFrame {
     
-    int L = 1;
+    int L = 1;// fuck if i know
     
     public MyFrame(int numParticles){
         Model myModel = new Model(L);
@@ -21,7 +26,9 @@ public class MyFrame extends JFrame {
         for(int i = 0; i < numParticles; i ++){
             myModel.addParticle();
         }
-        
+        /*
+        den riktiga magin händer i klasserna här bara lägger jag in allt typ.
+        */
         View myView = new View(myModel);
         Controller myController = new Controller(myModel, myView);
         this.add(myController);
@@ -32,6 +39,10 @@ public class MyFrame extends JFrame {
         
     }
     public static void main(String[] args) {
+        /*
+        Skicka in antalet partiklar som argument ! Lägg till exception
+        check här jag pallar inte.
+        */
         MyFrame theFrame = new MyFrame(Integer.parseInt(args[0]));
         
     }

@@ -48,30 +48,43 @@ public class Controller extends JPanel implements ChangeListener,
         
         Model = argModel;
         View = argView;
+        /*
+        du kan ju alltid snygga till layouten om du vill
+        */
         LSlider = new JSlider(JSlider.HORIZONTAL,0,10,1);
         TSlider = new JSlider(JSlider.HORIZONTAL,1,1000,5);
-        logInform = false;
+        logInform = false; // används för o kolla om den loggat färdigt
         try{
+            /*
+            den skapar en ny fil om den gamla ej finns
+            
+            VAAAARNING DEN RENSAR FILEN VARJE GÅNG DU KÖR
+            */
         logger = new PrintWriter("data.txt");}
             catch(IOException e){
                 System.out.println("Could not find textfile data.txt");
                 }
 
-        
-        this.add(LSlider);
+        /*
+        Lägger till sakerna på denna, denna läggs till på main skiten
+        */
+        this.add(LSlider); 
         this.add(TSlider);
         this.add(View);
         
-        timer = new Timer(1,this);
+        timer = new Timer(1,this); // klickar varje något sekund
         timer.setRepeats(true);
-        timer.start();
+        timer.start(); // startar timern
         
-        LSlider.addChangeListener(this);
+        LSlider.addChangeListener(this); // lyssna på dennas changelistener
         TSlider.addChangeListener(this);
     }
     
     public void stateChanged(ChangeEvent e){
         JSlider sourceSlider = (JSlider)e.getSource();
+        /*
+        ganska självförklarligt
+        */
         if(sourceSlider== LSlider){
             Model.setL(sourceSlider.getValue());
         }
@@ -89,6 +102,13 @@ public class Controller extends JPanel implements ChangeListener,
         data collector om denna ej är fast enough
         */
         if(timeElapsed <= logTime){
+            /*
+            1. få lista med positioner
+            2. gör till string
+            3. rensa från onödiga tecken
+            4. lägg till tiden 
+            5. skriv i logg filen
+            */
             ArrayList<Double> posList = Model.getPositions();
             String posString  = posList.toString();
             posString = posString.replace("[", "");
@@ -99,11 +119,14 @@ public class Controller extends JPanel implements ChangeListener,
             //System.out.print(posString);
         }
         else if(logInform == false){
+            /*
+            slutar logga om time IS UP
+            */
             logInform = true;
             logger.close();
             System.out.println("Stopped saving to log");
         }
-        Model.step();   
-        View.updateUI();
+        Model.step();    // kallar ett steg
+        View.updateUI(); // uppdaterar grafiken typ ?? kanske finns bättre sätt
     }
 }
